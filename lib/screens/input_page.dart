@@ -11,11 +11,12 @@ class _InputPageState extends State<InputPage> {
   int height = 170;
   int weight = 70;
   int age = 25;
+  String gender = 'Male'; // Default gender
 
   // Custom Method to Calculate BMI
   void _calculateBMI() {
     double bmiResult = weight / ((height / 100) * (height / 100));
-    
+
     // Navigation to Result Page (Routing Concept)
     Navigator.push(
       context,
@@ -51,12 +52,48 @@ class _InputPageState extends State<InputPage> {
                 padding: const EdgeInsets.all(16.0),
                 child: Text(
                   'BMI Calculator',
-                  style: Theme.of(context).textTheme.displayLarge,
+                  style: TextStyle(
+                    fontSize: 36,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
                   textAlign: TextAlign.center,
                 ),
               ),
 
-              // Height Slider Widget (Custom State Management)
+              // Gender Selection (Custom State Management)
+              Expanded(
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: _buildGenderCard(
+                        context,
+                        gender: 'Male',
+                        isSelected: gender == 'Male',
+                        onTap: () {
+                          setState(() {
+                            gender = 'Male';
+                          });
+                        },
+                      ),
+                    ),
+                    Expanded(
+                      child: _buildGenderCard(
+                        context,
+                        gender: 'Female',
+                        isSelected: gender == 'Female',
+                        onTap: () {
+                          setState(() {
+                            gender = 'Female';
+                          });
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // Height Slider Widget
               Expanded(
                 child: Container(
                   margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -69,7 +106,9 @@ class _InputPageState extends State<InputPage> {
                     children: [
                       Text(
                         'HEIGHT',
-                        style: Theme.of(context).textTheme.bodyLarge,
+                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                              color: Colors.white,
+                            ),
                       ),
                       Text(
                         '$height cm',
@@ -101,7 +140,7 @@ class _InputPageState extends State<InputPage> {
                 ),
               ),
 
-              // Weight and Age Containers (Custom Widget Composition)
+              // Weight and Age Containers
               Expanded(
                 child: Row(
                   children: [
@@ -127,7 +166,7 @@ class _InputPageState extends State<InputPage> {
                 ),
               ),
 
-              // Calculate Button (Interaction Concept)
+              // Calculate Button
               Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: ElevatedButton(
@@ -149,7 +188,48 @@ class _InputPageState extends State<InputPage> {
     );
   }
 
-  // Reusable Widget Method (Widget Composition)
+  // Gender Card Widget
+  Widget _buildGenderCard(
+    BuildContext context, {
+    required String gender,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: isSelected ? Colors.white12 : Colors.white10,
+          borderRadius: BorderRadius.circular(15),
+          border: isSelected
+              ? Border.all(color: Colors.white, width: 2)
+              : Border.all(color: Colors.transparent),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Image.asset(
+              'assets/images/${gender.toLowerCase()}.png', // Example: 'assets/male.png'
+              height: 80,
+              width: 80,
+            ),
+            SizedBox(height: 10),
+            Text(
+              gender.toUpperCase(),
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Reusable Widget for Parameter Cards
   Widget _buildParameterCard(
     BuildContext context, {
     required String title,
@@ -168,7 +248,9 @@ class _InputPageState extends State<InputPage> {
         children: [
           Text(
             title,
-            style: Theme.of(context).textTheme.bodyLarge,
+            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                  color: Colors.white,
+                ),
           ),
           Text(
             value,
