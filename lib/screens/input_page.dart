@@ -1,4 +1,6 @@
+// screens/input_page.dart
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'result_page.dart';
 
 class InputPage extends StatefulWidget {
@@ -7,170 +9,276 @@ class InputPage extends StatefulWidget {
 }
 
 class _InputPageState extends State<InputPage> {
-  // State Variables
-  int height = 170;
-  int weight = 70;
-  int age = 25;
-  String gender = 'Male'; // Default gender
+  
+  final _formKey = GlobalKey<FormState>();
+  final _weightController = TextEditingController();
+  final _heightFeetController = TextEditingController();
+  final _heightInchesController = TextEditingController();
+  final _heightCmController = TextEditingController();
 
-  // Custom Method to Calculate BMI
-  void _calculateBMI() {
-    double bmiResult = weight / ((height / 100) * (height / 100));
+  
+  String _selectedGender = 'Male';
+  String _weightUnit = 'kg';
+  String _heightUnit = 'cm';
+  int _age = 25;
 
-    // Navigation to Result Page (Routing Concept)
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => ResultPage(
-          bmiResult: bmiResult.toStringAsFixed(1),
+  
+  double _calculateBMI() {
+    double weightInKg = _weightUnit == 'kg'
+        ? double.parse(_weightController.text)
+        : double.parse(_weightController.text) * 0.453592;
+
+    double heightInMeters;
+    if (_heightUnit == 'cm') {
+      heightInMeters = double.parse(_heightCmController.text) / 100;
+    } else {
+      double feet = double.parse(_heightFeetController.text);
+      double inches = double.parse(_heightInchesController.text);
+      double totalInches = (feet * 12) + inches;
+      heightInMeters = totalInches * 0.0254;
+    }
+
+    return weightInKg / (heightInMeters * heightInMeters);
+  }
+
+  String _getBMICategory(double bmi) {
+    if (bmi < 16) return 'Severe Underweight';
+    if (bmi < 17) return 'Moderate Underweight';
+    if (bmi < 18.5) return 'Mild Underweight';
+    if (bmi < 25) return 'Normal Weight';
+    if (bmi < 30) return 'Overweight';
+    if (bmi < 35) return 'Obesity Class I';
+    if (bmi < 40) return 'Obesity Class II';
+    return 'Obesity Class III';
+  }
+
+  String _getHealthRisk(double bmi) {
+    if (bmi < 18.5) return 'Risk of nutritional deficiency and osteoporosis';
+    if (bmi < 25) return 'Low risk of health problems';
+    if (bmi < 30) return 'Moderate risk of heart disease and diabetes';
+    if (bmi < 35) return 'High risk of heart disease and diabetes';
+    return 'Very high risk of heart disease and diabetes';
+  }
+
+  void _submitForm() {
+    if (_formKey.currentState!.validate()) {
+      double bmi = _calculateBMI();
+      String category = _getBMICategory(bmi);
+      String healthRisk = _getHealthRisk(bmi);
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ResultPage(
+            bmiResult: bmi.toStringAsFixed(1),
+            category: category,
+            healthRisk: healthRisk,
+            age: _age,
+            gender: _selectedGender,
+          ),
         ),
-      ),
-    );
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Custom Gradient Background (Decoration Concept)
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              Color(0xFF6A5ACD),
-              Color(0xFF7B68EE),
-            ],
+            colors: [Color(0xFF6A5ACD), Color(0xFF7B68EE)],
           ),
         ),
         child: SafeArea(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // Custom App Bar (Widget Composition)
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Text(
-                  'BMI Calculator',
-                  style: TextStyle(
-                    fontSize: 36,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
+          child: Form(
+            key: _formKey,
+            child: ListView(
+              padding: EdgeInsets.all(16),
+              children: [
+                Text(
+                  'Enter Your Details',
+                  style: Theme.of(context).textTheme.displayLarge,
                   textAlign: TextAlign.center,
                 ),
-              ),
+                SizedBox(height: 32),
 
-              // Gender Selection (Custom State Management)
-              Expanded(
-                child: Row(
+      
+                Row(
                   children: [
                     Expanded(
-                      child: _buildGenderCard(
-                        context,
-                        gender: 'Male',
-                        isSelected: gender == 'Male',
-                        onTap: () {
-                          setState(() {
-                            gender = 'Male';
-                          });
+                      child: _buildGenderCard('Male'),
+                    ),
+                    Expanded(
+                      child: _buildGenderCard('Female'),
+                    ),
+                  ],
+                ),
+
+                SizedBox(height: 24),
+
+          
+                Row(
+                  children: [
+                    Expanded(
+                      flex: 2,
+                      child: TextFormField(
+                        controller: _weightController,
+                        keyboardType: TextInputType.number,
+                        style: TextStyle(color: Colors.white),
+                        decoration: InputDecoration(
+                          labelText: 'Weight',
+                          labelStyle: TextStyle(color: Colors.white70),
+                        ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter weight';
+                          }
+                          return null;
                         },
                       ),
                     ),
+                    SizedBox(width: 16),
                     Expanded(
-                      child: _buildGenderCard(
-                        context,
-                        gender: 'Female',
-                        isSelected: gender == 'Female',
-                        onTap: () {
-                          setState(() {
-                            gender = 'Female';
-                          });
+                      child: DropdownButtonFormField<String>(
+                        value: _weightUnit,
+                        dropdownColor: Color(0xFF6A5ACD),
+                        style: TextStyle(color: Colors.white),
+                        decoration: InputDecoration(
+                          labelStyle: TextStyle(color: Colors.white70),
+                        ),
+                        items: ['kg', 'lbs']
+                            .map((unit) => DropdownMenuItem(
+                                  value: unit,
+                                  child: Text(unit),
+                                ))
+                            .toList(),
+                        onChanged: (value) {
+                          setState(() => _weightUnit = value!);
                         },
                       ),
                     ),
                   ],
                 ),
-              ),
 
-              // Height Slider Widget
-              Expanded(
-                child: Container(
-                  margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  decoration: BoxDecoration(
-                    color: Colors.white10,
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                SizedBox(height: 24),
+
+            
+                Row(
+                  children: [
+                    Expanded(
+                      child: DropdownButtonFormField<String>(
+                        value: _heightUnit,
+                        dropdownColor: Color(0xFF6A5ACD),
+                        style: TextStyle(color: Colors.white),
+                        decoration: InputDecoration(
+                          labelText: 'Height Unit',
+                          labelStyle: TextStyle(color: Colors.white70),
+                        ),
+                        items: ['cm', 'ft']
+                            .map((unit) => DropdownMenuItem(
+                                  value: unit,
+                                  child: Text(unit),
+                                ))
+                            .toList(),
+                        onChanged: (value) {
+                          setState(() => _heightUnit = value!);
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+
+                SizedBox(height: 16),
+
+                if (_heightUnit == 'cm')
+                  TextFormField(
+                    controller: _heightCmController,
+                    keyboardType: TextInputType.number,
+                    style: TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      labelText: 'Height (cm)',
+                      labelStyle: TextStyle(color: Colors.white70),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter height';
+                      }
+                      return null;
+                    },
+                  )
+                else
+                  Row(
                     children: [
-                      Text(
-                        'HEIGHT',
-                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                              color: Colors.white,
-                            ),
-                      ),
-                      Text(
-                        '$height cm',
-                        style: TextStyle(
-                          fontSize: 42,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                      Expanded(
+                        child: TextFormField(
+                          controller: _heightFeetController,
+                          keyboardType: TextInputType.number,
+                          style: TextStyle(color: Colors.white),
+                          decoration: InputDecoration(
+                            labelText: 'Feet',
+                            labelStyle: TextStyle(color: Colors.white70),
+                          ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Required';
+                            }
+                            return null;
+                          },
                         ),
                       ),
-                      SliderTheme(
-                        data: SliderThemeData(
-                          activeTrackColor: Colors.white,
-                          inactiveTrackColor: Colors.white30,
-                          thumbColor: Colors.white,
-                        ),
-                        child: Slider(
-                          value: height.toDouble(),
-                          min: 120,
-                          max: 220,
-                          onChanged: (double newValue) {
-                            setState(() {
-                              height = newValue.round();
-                            });
+                      SizedBox(width: 16),
+                      Expanded(
+                        child: TextFormField(
+                          controller: _heightInchesController,
+                          keyboardType: TextInputType.number,
+                          style: TextStyle(color: Colors.white),
+                          decoration: InputDecoration(
+                            labelText: 'Inches',
+                            labelStyle: TextStyle(color: Colors.white70),
+                          ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Required';
+                            }
+                            return null;
                           },
                         ),
                       ),
                     ],
                   ),
-                ),
-              ),
 
-              // Weight and Age Containers
-              Expanded(
-                child: Row(
+                SizedBox(height: 24),
+
+          
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Expanded(
-                      child: _buildParameterCard(
-                        context,
-                        title: 'WEIGHT',
-                        value: '$weight kg',
-                        onDecrement: () => setState(() => weight--),
-                        onIncrement: () => setState(() => weight++),
-                      ),
+                    Text(
+                      'Age: $_age',
+                      style: TextStyle(color: Colors.white, fontSize: 18),
                     ),
-                    Expanded(
-                      child: _buildParameterCard(
-                        context,
-                        title: 'AGE',
-                        value: '$age',
-                        onDecrement: () => setState(() => age--),
-                        onIncrement: () => setState(() => age++),
-                      ),
+                    SizedBox(width: 16),
+                    FloatingActionButton(
+                      mini: true,
+                      onPressed: () => setState(() => _age--),
+                      child: Icon(Icons.remove),
+                    ),
+                    SizedBox(width: 8),
+                    FloatingActionButton(
+                      mini: true,
+                      onPressed: () => setState(() => _age++),
+                      child: Icon(Icons.add),
                     ),
                   ],
                 ),
-              ),
 
-              // Calculate Button
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: ElevatedButton(
-                  onPressed: _calculateBMI,
+                SizedBox(height: 32),
+
+                ElevatedButton(
+                  onPressed: _submitForm,
                   child: Text(
                     'CALCULATE BMI',
                     style: TextStyle(
@@ -180,106 +288,48 @@ class _InputPageState extends State<InputPage> {
                     ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 
-  // Gender Card Widget
-  Widget _buildGenderCard(
-    BuildContext context, {
-    required String gender,
-    required bool isSelected,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        margin: EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: isSelected ? Colors.white12 : Colors.white10,
-          borderRadius: BorderRadius.circular(15),
-          border: isSelected
-              ? Border.all(color: Colors.white, width: 2)
-              : Border.all(color: Colors.transparent),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Image.asset(
-              'assets/images/${gender.toLowerCase()}.png', // Example: 'assets/male.png'
-              height: 80,
-              width: 80,
-            ),
-            SizedBox(height: 10),
-            Text(
-              gender.toUpperCase(),
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // Reusable Widget for Parameter Cards
-  Widget _buildParameterCard(
-    BuildContext context, {
-    required String title,
-    required String value,
-    required VoidCallback onDecrement,
-    required VoidCallback onIncrement,
-  }) {
-    return Container(
+  Widget _buildGenderCard(String gender) {
+  bool isSelected = _selectedGender == gender;
+  return GestureDetector(
+    onTap: () => setState(() => _selectedGender = gender),
+    child: Container(
       margin: EdgeInsets.all(8),
+      padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white10,
+        color: isSelected ? Colors.white12 : Colors.white10,
         borderRadius: BorderRadius.circular(15),
+        border: isSelected
+            ? Border.all(color: Colors.white, width: 2)
+            : Border.all(color: Colors.transparent),
       ),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text(
-            title,
-            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: Colors.white,
-                ),
+          Image.asset(
+            gender == 'Male' ? 'assets/images/male.png' : 'assets/images/female.png',
+            width: 50,
+            height: 50,
+            fit: BoxFit.cover, // Adjust this to fit the image well
           ),
+          SizedBox(height: 8),
           Text(
-            value,
+            gender,
             style: TextStyle(
-              fontSize: 42,
-              fontWeight: FontWeight.bold,
               color: Colors.white,
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
             ),
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              FloatingActionButton(
-                heroTag: 'decrement$title',
-                backgroundColor: Colors.white12,
-                child: Icon(Icons.remove, color: Colors.white),
-                onPressed: onDecrement,
-              ),
-              SizedBox(width: 16),
-              FloatingActionButton(
-                heroTag: 'increment$title',
-                backgroundColor: Colors.white12,
-                child: Icon(Icons.add, color: Colors.white),
-                onPressed: onIncrement,
-              ),
-            ],
           ),
         ],
       ),
-    );
-  }
+    ),
+  );
+}
 }
