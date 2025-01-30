@@ -1,27 +1,19 @@
-// screens/result_page.dart
 import 'package:flutter/material.dart';
-import 'input_page.dart';
+import './input_page.dart';
 
 class ResultPage extends StatelessWidget {
   final String bmiResult;
   final String category;
-  final String healthRisk;
-  final int age;
-  final String gender;
 
   const ResultPage({
+    super.key,
     required this.bmiResult,
     required this.category,
-    required this.healthRisk,
-    required this.age,
-    required this.gender,
   });
 
   Color _getCategoryColor() {
     switch (category) {
-      case 'Severe Underweight':
-      case 'Moderate Underweight':
-      case 'Mild Underweight':
+      case 'Underweight':
         return Colors.blue;
       case 'Normal Weight':
         return Colors.green;
@@ -32,101 +24,149 @@ class ResultPage extends StatelessWidget {
     }
   }
 
- 
+  String _getCategoryEmoji() {
+    switch (category) {
+      case 'Underweight':
+        return '⚡';
+      case 'Normal Weight':
+        return '💪';
+      case 'Overweight':
+        return '⚠️';
+      default:
+        return '❗';
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text(
+          'Your BMI Result',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        centerTitle: true,
+        backgroundColor: Colors.blue[800],
+      ),
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [Color(0xFF6A5ACD), Color(0xFF7B68EE)],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Colors.blue[800]!, Colors.blue[900]!],
           ),
         ),
         child: SafeArea(
-          child: Padding(
-            padding: EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(
-                  'Your Results',
-                  style: Theme.of(context).textTheme.displayLarge,
-                  textAlign: TextAlign.center,
-                ),
-                SizedBox(height: 24),
-                Card(
-                  color: Colors.white10,
-                  child: Padding(
-                    padding: EdgeInsets.all(16),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        Column(
-                          children: [
-                            Icon(
-                              gender == 'Male' ? Icons.male : Icons.female,
-                              color: Colors.white,
-                              size: 32,
-                            ),
-                            Text(
-                              gender,
-                              style: TextStyle(color: Colors.white),
-                            ),
-                          ],
-                        ),
-                        Column(
-                          children: [
-                            Icon(
-                              Icons.calendar_today,
-                              color: Colors.white,
-                              size: 32,
-                            ),
-                            Text(
-                              '$age years',
-                              style: TextStyle(color: Colors.white),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                
-                SizedBox(height: 24),
-                Expanded(
-                  flex: 2,
+          child: Column(
+            children: [
+              Expanded(
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(24),
                   child: Card(
-                    color: Colors.white10,
-                    child: Padding(
-                      padding: EdgeInsets.all(16),
+                    elevation: 8,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(20),
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [Colors.white, Colors.blue[50]!],
+                        ),
+                      ),
+                      padding: const EdgeInsets.all(24),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text(
-                            category,
-                            style: TextStyle(
+                          Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: _getCategoryColor().withOpacity(0.1),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              Icons.health_and_safety,
+                              size: 80,
                               color: _getCategoryColor(),
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
                             ),
                           ),
-                          SizedBox(height: 16),
+                          const SizedBox(height: 24),
                           Text(
-                            bmiResult,
+                            'Your BMI is',
                             style: TextStyle(
-                              fontSize: 64,
-                              fontWeight: FontWeight.bold,
+                              fontSize: 22,
+                              color: Colors.grey[700],
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 24,
+                              vertical: 12,
+                            ),
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [
+                                  _getCategoryColor().withOpacity(0.7),
+                                  _getCategoryColor(),
+                                ],
+                              ),
+                              borderRadius: BorderRadius.circular(20),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: _getCategoryColor().withOpacity(0.3),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
+                            ),
+                            child: Text(
+                              bmiResult,
+                              style: const TextStyle(
+                                fontSize: 64,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 24,
+                              vertical: 12,
+                            ),
+                            decoration: BoxDecoration(
                               color: Colors.white,
+                              borderRadius: BorderRadius.circular(15),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.grey.withOpacity(0.2),
+                                  blurRadius: 4,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
                             ),
-                          ),
-                          Text(
-                            'BMI',
-                            style: TextStyle(
-                              color: Colors.white70,
-                              fontSize: 20,
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  _getCategoryEmoji(),
+                                  style: const TextStyle(fontSize: 24),
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  category,
+                                  style: TextStyle(
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.bold,
+                                    color: _getCategoryColor(),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ],
@@ -134,57 +174,54 @@ class ResultPage extends StatelessWidget {
                     ),
                   ),
                 ),
-                
-                SizedBox(height: 16),
-                Expanded(
-                  child: Card(
-                    color: Colors.white10,
-                    child: Padding(
-                      padding: EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Health Risk:',
-                            style: TextStyle(
-                              color: Colors.white70,
-                              fontSize: 18,
-                            ),
-                          ),
-                          SizedBox(height: 8),
-                          Text(
-                            healthRisk,
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                            ),
-                          ),
-                        ],
+              ),
+              Padding(
+                padding: const EdgeInsets.all(24),
+                child: Container(
+                  width: double.infinity,
+                  height: 55,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(30),
+                    gradient: LinearGradient(
+                      colors: [Colors.white.withOpacity(0.9), Colors.white],
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        spreadRadius: 0,
+                        blurRadius: 8,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(builder: (context) => const InputPage()),
+                        (route) => false,
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.transparent,
+                      shadowColor: Colors.transparent,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                    ),
+                    child: Text(
+                      'Calculate Again',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.blue[900],
+                        letterSpacing: 1,
                       ),
                     ),
                   ),
                 ),
-                SizedBox(height: 16),
-                
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.pushAndRemoveUntil(
-                      context,
-                      MaterialPageRoute(builder: (context) => InputPage()),
-                      (route) => false,
-                    );
-                  },
-                  child: Text(
-                    'CALCULATE AGAIN',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
