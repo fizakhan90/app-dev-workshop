@@ -1,10 +1,7 @@
-import 'package:app_dev_workshop/main.dart';
 import 'package:app_dev_workshop/screens/input_page.dart';
 import 'package:flutter/material.dart';
 
-void main() {
-  runApp(const BMICalculatorApp());
-}
+
 class WelcomePage extends StatelessWidget {
   const WelcomePage({super.key});
 

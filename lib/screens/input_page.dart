@@ -15,6 +15,7 @@ class _InputPageState extends State<InputPage> {
   String? selectedGender;
   double age = 25;
 
+  // Simplified BMI calculation and navigation
   void _calculateBMI() {
     if (_formKey.currentState!.validate() && selectedGender != null) {
       double weight = double.parse(_weightController.text);
@@ -30,21 +31,15 @@ class _InputPageState extends State<InputPage> {
           ),
         ),
       );
-    } else if (selectedGender == null) {
+    } else {
+      // Simplified error message
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please select a gender'),
-          backgroundColor: Colors.redAccent,
-          behavior: SnackBarBehavior.floating,
-          margin: EdgeInsets.all(16),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(10)),
-          ),
-        ),
+        const SnackBar(content: Text('Please fill all fields and select gender')),
       );
     }
   }
 
+  // Simple BMI category determination
   String _getBMICategory(double bmi) {
     if (bmi < 18.5) return 'Underweight';
     if (bmi < 25) return 'Normal Weight';
@@ -52,52 +47,34 @@ class _InputPageState extends State<InputPage> {
     return 'Obese';
   }
 
+  // Simplified gender card with basic animation
   Widget _buildGenderCard(String gender, String assetPath) {
     bool isSelected = selectedGender == gender;
     
     return GestureDetector(
-      onTap: () {
-        setState(() {
-          selectedGender = gender;
-        });
-      },
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 300),
+      onTap: () => setState(() => selectedGender = gender),
+      child: Container(
         decoration: BoxDecoration(
-          gradient: isSelected 
-            ? LinearGradient(
-                colors: [Colors.blue[400]!, Colors.blue[600]!],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              )
-            : null,
-          color: isSelected ? null : Colors.white,
+          color: isSelected ? Colors.blue : Colors.white,
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: isSelected 
-                ? Colors.blue.withOpacity(0.3)
-                : Colors.grey.withOpacity(0.2),
-              spreadRadius: isSelected ? 3 : 2,
-              blurRadius: isSelected ? 8 : 5,
-              offset: const Offset(0, 3),
+              color: Colors.grey.withOpacity(0.2),
+              spreadRadius: 2,
+              blurRadius: 5,
             ),
           ],
         ),
         padding: const EdgeInsets.all(20.0),
         child: Column(
           children: [
-            Image.asset(
-              assetPath,
-              height: 70,
-              width: 70,
-            ),
+            Image.asset(assetPath, height: 70, width: 70),
             const SizedBox(height: 16),
             Text(
               gender,
               style: TextStyle(
                 fontSize: 18,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                fontWeight: FontWeight.bold,
                 color: isSelected ? Colors.white : Colors.black87,
               ),
             ),
@@ -107,64 +84,25 @@ class _InputPageState extends State<InputPage> {
     );
   }
 
+  // Simplified input field
   Widget _buildInputField(TextEditingController controller, String label, String suffix) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.blue.withOpacity(0.1),
-            spreadRadius: 1,
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: TextFormField(
-        controller: controller,
-        keyboardType: TextInputType.number,
-        style: const TextStyle(
-          fontSize: 18,
-          fontWeight: FontWeight.w500,
+    return TextFormField(
+      controller: controller,
+      keyboardType: TextInputType.number,
+      decoration: InputDecoration(
+        labelText: label,
+        suffixText: suffix,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
         ),
-        decoration: InputDecoration(
-          labelText: label,
-          labelStyle: TextStyle(
-            color: Colors.grey[600],
-            fontSize: 16,
-          ),
-          suffixText: suffix,
-          suffixStyle: TextStyle(
-            color: Colors.blue[800],
-            fontWeight: FontWeight.bold,
-          ),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(16),
-            borderSide: BorderSide(color: Colors.blue[100]!, width: 1),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(16),
-            borderSide: BorderSide(color: Colors.blue[100]!, width: 1),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(16),
-            borderSide: BorderSide(color: Colors.blue[400]!, width: 2),
-          ),
-          filled: true,
-          fillColor: Colors.white,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-        ),
-        validator: (value) {
-          if (value == null || value.isEmpty) {
-            return 'This field is required';
-          }
-          if (double.tryParse(value) == null) {
-            return 'Please enter a valid number';
-          }
-          return null;
-        },
+        filled: true,
+        fillColor: Colors.white,
       ),
+      validator: (value) {
+        if (value == null || value.isEmpty) return 'This field is required';
+        if (double.tryParse(value) == null) return 'Please enter a valid number';
+        return null;
+      },
     );
   }
 
@@ -172,16 +110,9 @@ class _InputPageState extends State<InputPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'BMI Calculator',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 24,
-          ),
-        ),
+        title: const Text('BMI Calculator'),
         centerTitle: true,
         backgroundColor: Colors.blue[800],
-        elevation: 0,
       ),
       body: Container(
         decoration: BoxDecoration(
@@ -192,152 +123,73 @@ class _InputPageState extends State<InputPage> {
             stops: const [0.0, 0.2],
           ),
         ),
-        child: SafeArea(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20.0),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const Text(
-                    'Tell us about yourself',
-                    style: TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24.0),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const Text(
+                  'Tell us about yourself',
+                  style: TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Fill in your details below to calculate your BMI',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.white.withOpacity(0.9),
-                    ),
-                  ),
-                  const SizedBox(height: 32),
-                  Row(
+                ),
+                const SizedBox(height: 32),
+                
+                // Gender Selection
+                Row(
+                  children: [
+                    Expanded(child: _buildGenderCard('Male', 'assets/images/male.png')),
+                    const SizedBox(width: 20),
+                    Expanded(child: _buildGenderCard('Female', 'assets/images/female.png')),
+                  ],
+                ),
+                
+                const SizedBox(height: 32),
+                
+                // Age Slider
+                Container(
+                  color: Colors.white,
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Expanded(
-                        child: _buildGenderCard(
-                          'Male',
-                          'assets/images/male.png',
-                        ),
-                      ),
-                      const SizedBox(width: 20),
-                      Expanded(
-                        child: _buildGenderCard(
-                          'Female',
-                          'assets/images/female.png',
-                        ),
+                      Text('Age: ${age.toInt()} years'),
+                      Slider(
+                        value: age,
+                        min: 1,
+                        max: 120,
+                        onChanged: (value) => setState(() => age = value),
                       ),
                     ],
                   ),
-                  
-                  const SizedBox(height: 32),
-                  
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(20),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.blue.withOpacity(0.1),
-                          spreadRadius: 1,
-                          blurRadius: 4,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    padding: const EdgeInsets.all(20),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Age: ${age.toInt()} years',
-                          style: const TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black87,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        SliderTheme(
-                          data: SliderTheme.of(context).copyWith(
-                            activeTrackColor: Colors.blue[400],
-                            inactiveTrackColor: Colors.blue[100],
-                            thumbColor: Colors.blue[800],
-                            overlayColor: Colors.blue[100]?.withOpacity(0.3),
-                            valueIndicatorColor: Colors.blue[800],
-                            valueIndicatorTextStyle: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          child: Slider(
-                            value: age,
-                            min: 1,
-                            max: 120,
-                            divisions: 119,
-                            label: age.round().toString(),
-                            onChanged: (double value) {
-                              setState(() {
-                                age = value;
-                              });
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  
-                  const SizedBox(height: 32),
-                  _buildInputField(_weightController, 'Weight', 'kg'),
-                  const SizedBox(height: 20),
-                  _buildInputField(_heightController, 'Height', 'cm'),
-                  
-                  const SizedBox(height: 40),
-                  Container(
-                    height: 60,
-                    decoration: BoxDecoration(
+                ),
+                
+                const SizedBox(height: 32),
+                _buildInputField(_weightController, 'Weight', 'kg'),
+                const SizedBox(height: 20),
+                _buildInputField(_heightController, 'Height', 'cm'),
+                
+                const SizedBox(height: 40),
+                ElevatedButton(
+                  onPressed: _calculateBMI,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue[700],
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(30),
-                      gradient: LinearGradient(
-                        colors: [Colors.blue[700]!, Colors.blue[900]!],
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.blue[300]!.withOpacity(0.5),
-                          spreadRadius: 1,
-                          blurRadius: 8,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: ElevatedButton(
-                      onPressed: _calculateBMI,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.transparent,
-                        shadowColor: Colors.transparent,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30),
-                        ),
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                      ),
-                      child: const Text(
-                        'Calculate BMI',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 1,
-                          color: Colors.white,
-                        ),
-                      ),
                     ),
                   ),
-                ],
-              ),
+                  child: const Text(
+                    'Calculate BMI',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ],
             ),
           ),
         ),

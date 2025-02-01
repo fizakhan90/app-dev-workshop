@@ -1,5 +1,5 @@
 // main.dart
-import 'package:app_dev_workshop/screens/welcome_page.dart';
+import 'package:app_dev_workshop/screens/input_page.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -18,7 +18,7 @@ class BMICalculatorApp extends StatelessWidget {
         primarySwatch: Colors.blue,
         scaffoldBackgroundColor: Colors.blue[900],
       ),
-      home: const WelcomePage(),
+      home: const InputPage(),
     );
   }
 }
